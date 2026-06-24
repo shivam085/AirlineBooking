@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { Link, NavLink } from 'react-router-dom';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { logout } from '../../store/slices/authSlice';
 import { HiOutlineMenuAlt3, HiOutlineX } from 'react-icons/hi';
-import { FiUser } from 'react-icons/fi';
+import { FiUser, FiLogOut } from 'react-icons/fi';
 import { MdFlightTakeoff } from 'react-icons/md';
 
 const navLinks = [
@@ -12,8 +14,19 @@ const navLinks = [
 
 const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+  const { isAuthenticated, user } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+
+  const handleLogout = () => {
+    dispatch(logout());
+    setIsDropdownOpen(false);
+    navigate('/');
+  };
 
   return (
     <nav className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
@@ -49,20 +62,57 @@ const Navbar = () => {
             ))}
           </div>
 
-          {/* ─── Auth Buttons (Desktop) ─── */}
+          {/* ─── Auth Buttons / User Menu (Desktop) ─── */}
           <div className="hidden md:flex items-center gap-3">
-            <Link
-              to="/login"
-              className="px-4 py-2 text-sm font-medium text-gray hover:text-dark transition-colors duration-200"
-            >
-              Log In
-            </Link>
-            <Link
-              to="/register"
-              className="px-5 py-2.5 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-primary/25"
-            >
-              Sign Up
-            </Link>
+            {isAuthenticated && user ? (
+              <div className="relative">
+                <button
+                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors"
+                >
+                  <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold">
+                    {user.firstName.charAt(0)}
+                  </div>
+                  <span className="text-sm font-medium text-dark">{user.firstName}</span>
+                </button>
+
+                {isDropdownOpen && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg py-1">
+                    <div className="px-4 py-2 border-b border-gray-100 text-xs text-gray truncate">
+                      {user.email}
+                    </div>
+                    <Link
+                      to="/profile"
+                      className="block px-4 py-2 text-sm text-dark hover:bg-gray-50"
+                      onClick={() => setIsDropdownOpen(false)}
+                    >
+                      Profile Settings
+                    </Link>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left px-4 py-2 text-sm text-error hover:bg-error/10 flex items-center gap-2"
+                    >
+                      <FiLogOut /> Logout
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  className="px-4 py-2 text-sm font-medium text-gray hover:text-dark transition-colors duration-200"
+                >
+                  Log In
+                </Link>
+                <Link
+                  to="/register"
+                  className="px-5 py-2.5 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-lg transition-all duration-200 hover:shadow-lg hover:shadow-primary/25"
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
           </div>
 
           {/* ─── Mobile Menu Button ─── */}
@@ -83,7 +133,7 @@ const Navbar = () => {
       {/* ─── Mobile Menu ─── */}
       <div
         className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-          isMenuOpen ? 'max-h-80 opacity-100' : 'max-h-0 opacity-0'
+          isMenuOpen ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
         }`}
       >
         <div className="px-4 pb-4 space-y-1 bg-white border-t border-gray-100">
@@ -104,21 +154,41 @@ const Navbar = () => {
             </NavLink>
           ))}
           <div className="pt-3 border-t border-gray-100 flex flex-col gap-2">
-            <Link
-              to="/login"
-              onClick={() => setIsMenuOpen(false)}
-              className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray hover:text-dark rounded-lg hover:bg-gray-50 transition-colors"
-            >
-              <FiUser className="text-lg" />
-              Log In
-            </Link>
-            <Link
-              to="/register"
-              onClick={() => setIsMenuOpen(false)}
-              className="px-4 py-2.5 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-lg text-center transition-colors"
-            >
-              Sign Up
-            </Link>
+            {isAuthenticated && user ? (
+              <>
+                <div className="px-4 py-2 text-sm text-gray flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold">
+                    {user.firstName.charAt(0)}
+                  </div>
+                  Logged in as {user.firstName}
+                </div>
+                <button
+                  onClick={() => { handleLogout(); setIsMenuOpen(false); }}
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-error hover:bg-error/10 rounded-lg transition-colors"
+                >
+                  <FiLogOut className="text-lg" />
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/login"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="flex items-center gap-2 px-4 py-2.5 text-sm font-medium text-gray hover:text-dark rounded-lg hover:bg-gray-50 transition-colors"
+                >
+                  <FiUser className="text-lg" />
+                  Log In
+                </Link>
+                <Link
+                  to="/register"
+                  onClick={() => setIsMenuOpen(false)}
+                  className="px-4 py-2.5 bg-primary hover:bg-primary-dark text-white text-sm font-medium rounded-lg text-center transition-colors"
+                >
+                  Sign Up
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </div>

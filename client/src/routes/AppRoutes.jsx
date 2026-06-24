@@ -1,5 +1,7 @@
 import { Routes, Route } from 'react-router-dom';
 import Home from '../pages/Home';
+import Login from '../pages/Login';
+import Register from '../pages/Register';
 
 // ─── Centralized Route Definitions ───
 // Every page in the app is registered here.
@@ -10,10 +12,8 @@ const AppRoutes = () => {
     <Routes>
       {/* Public Routes */}
       <Route path="/" element={<Home />} />
-
-      {/* Auth Routes (Step 6) */}
-      {/* <Route path="/login" element={<Login />} /> */}
-      {/* <Route path="/register" element={<Register />} /> */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
 
       {/* Protected Routes (Step 6) */}
       {/* <Route element={<ProtectedRoute />}> */}
