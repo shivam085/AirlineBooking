@@ -1,0 +1,78 @@
+@import "tailwindcss";
+
+/* ========== Custom Theme (CSS Variables) ========== */
+/* 
+ * TailwindCSS v4 uses CSS-native theming with @theme.
+ * These become available as Tailwind utilities automatically.
+ * e.g., bg-primary, text-secondary, font-heading, etc.
+ */
+@theme {
+  /* Primary Colors — Deep Sky Blue palette */
+  --color-primary: #0EA5E9;
+  --color-primary-light: #38BDF8;
+  --color-primary-dark: #0284C7;
+
+  /* Secondary Colors — Warm accents */
+  --color-secondary: #F97316;
+  --color-secondary-light: #FB923C;
+  --color-secondary-dark: #EA580C;
+
+  /* Neutral Colors */
+  --color-dark: #0F172A;
+  --color-dark-light: #1E293B;
+  --color-gray: #64748B;
+  --color-gray-light: #94A3B8;
+  --color-light: #F1F5F9;
+  --color-white: #FFFFFF;
+
+  /* Status Colors */
+  --color-success: #22C55E;
+  --color-error: #EF4444;
+  --color-warning: #EAB308;
+
+  /* Fonts */
+  --font-heading: 'Inter', sans-serif;
+  --font-body: 'Inter', sans-serif;
+
+  /* Shadows */
+  --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.08);
+  --shadow-hover: 0 8px 30px rgba(0, 0, 0, 0.12);
+}
+
+/* ========== Base Styles ========== */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  font-family: var(--font-body);
+  background-color: var(--color-light);
+  color: var(--color-dark);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ========== Scrollbar ========== */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-light);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-gray-light);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-gray);
+}
