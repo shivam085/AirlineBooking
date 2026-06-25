@@ -1,7 +1,6 @@
-import { useState } from 'react';
+import { useState, useContext } from 'react';
 import { Link, NavLink, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { logout } from '../../store/slices/authSlice';
+import { AuthContext } from '../../contexts/AuthContext';
 import { HiOutlineMenuAlt3, HiOutlineX } from 'react-icons/hi';
 import { FiUser, FiLogOut } from 'react-icons/fi';
 import { MdFlightTakeoff } from 'react-icons/md';
@@ -16,14 +15,14 @@ const Navbar = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
-  const { isAuthenticated, user } = useSelector((state) => state.auth);
-  const dispatch = useDispatch();
+  const { user, logout } = useContext(AuthContext);
+  const isAuthenticated = !!user;
   const navigate = useNavigate();
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
-  const handleLogout = () => {
-    dispatch(logout());
+  const handleLogout = async () => {
+    await logout();
     setIsDropdownOpen(false);
     navigate('/');
   };

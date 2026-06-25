@@ -22,27 +22,32 @@ module.exports = (sequelize) => {
         type: DataTypes.UUID,
         allowNull: false,
       },
-      bookingReference: {
+      passengers: {
+        type: DataTypes.JSON,
+        allowNull: false,
+        defaultValue: []
+      },
+      seatNumbers: {
+        type: DataTypes.JSON,
+        allowNull: false,
+        defaultValue: []
+      },
+      amount: {
+        type: DataTypes.FLOAT,
+        allowNull: false,
+      },
+      paymentId: {
         type: DataTypes.STRING,
-        allowNull: false,
-        unique: true,
+        allowNull: true,
       },
-      passengerCount: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-      },
-      totalAmount: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
-      },
-      status: {
-        type: DataTypes.ENUM('pending', 'confirmed', 'cancelled', 'refunded'),
+      paymentStatus: {
+        type: DataTypes.ENUM('pending', 'successful', 'failed'),
         defaultValue: 'pending',
       },
-      bookedAt: {
-        type: DataTypes.DATE,
-        defaultValue: DataTypes.NOW,
-      },
+      bookingStatus: {
+        type: DataTypes.ENUM('confirmed', 'cancelled'),
+        defaultValue: 'confirmed',
+      }
     },
     {
       sequelize,

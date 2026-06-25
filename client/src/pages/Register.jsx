@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { AuthContext } from '../contexts/AuthContext';
 import { FiUser, FiMail, FiLock, FiCheckCircle } from 'react-icons/fi';
 
 const Register = () => {
@@ -10,33 +11,37 @@ const Register = () => {
     password: '',
     confirmPassword: '',
   });
-  const [error, setError] = useState(null);
+  const [localError, setLocalError] = useState(null);
   const [isSuccess, setIsSuccess] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   
+  const { register, loading: isLoading } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  // Clear errors on mount
+  useEffect(() => {
+    setLocalError(null);
+  }, []);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.id]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
+    setLocalError(null);
 
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setLocalError('Passwords do not match');
       return;
     }
 
-    setIsLoading(true);
-
-    // MOCK REGISTRATION for Phase 2 UI testing
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      await register(formData);
       setIsSuccess(true);
       setTimeout(() => navigate('/login'), 2000);
-    }, 1500);
+    } catch (err) {
+      setLocalError(err);
+    }
   };
 
   if (isSuccess) {
@@ -64,9 +69,9 @@ const Register = () => {
           <p className="text-gray">Join SkyBook for faster booking and rewards</p>
         </div>
 
-        {error && (
+        {localError && (
           <div className="mb-6 p-3 bg-error/10 border border-error/20 text-error rounded-lg text-sm text-center">
-            {error}
+            {localError}
           </div>
         )}
 

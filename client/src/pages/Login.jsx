@@ -1,33 +1,29 @@
-import { useState } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
-import { loginStart, loginSuccess, loginFailure } from '../store/slices/authSlice';
+import { AuthContext } from '../contexts/AuthContext';
 import { FiMail, FiLock, FiArrowRight } from 'react-icons/fi';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  
-  const dispatch = useDispatch();
+  const [localError, setLocalError] = useState(null);
+  const { login, loading: isLoading } = useContext(AuthContext);
   const navigate = useNavigate();
-  const { isLoading, error } = useSelector((state) => state.auth);
 
-  const handleSubmit = (e) => {
+  // Clear any existing errors when component mounts
+  useEffect(() => {
+    setLocalError(null);
+  }, []);
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    dispatch(loginStart());
-
-    // MOCK LOGIN for Phase 2 UI testing
-    setTimeout(() => {
-      if (email === 'demo@skybook.com' && password === 'password') {
-        dispatch(loginSuccess({
-          user: { id: '1', firstName: 'Demo', lastName: 'User', email },
-          token: 'mock-jwt-token'
-        }));
-        navigate('/');
-      } else {
-        dispatch(loginFailure('Invalid email or password. Try demo@skybook.com / password'));
-      }
-    }, 1000);
+    
+    try {
+      await login({ email, password });
+      navigate('/');
+    } catch (err) {
+      setLocalError(err);
+    }
   };
 
   return (
@@ -43,9 +39,9 @@ const Login = () => {
           <p className="text-gray">Sign in to manage your flights</p>
         </div>
 
-        {error && (
+        {localError && (
           <div className="mb-6 p-3 bg-error/10 border border-error/20 text-error rounded-lg text-sm text-center">
-            {error}
+            {localError}
           </div>
         )}
 

@@ -7,49 +7,25 @@ const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 
-// Import all models manually to control order and ensure they are all loaded
+// Load the 4 simplified models
 db.User = require('./User')(sequelize);
 db.Airport = require('./Airport')(sequelize);
 db.Flight = require('./Flight')(sequelize);
-db.Seat = require('./Seat')(sequelize);
 db.Booking = require('./Booking')(sequelize);
-db.Passenger = require('./Passenger')(sequelize);
-db.Payment = require('./Payment')(sequelize);
 
-// Define all relationships exactly as specified
+// User -> Booking
+db.User.hasMany(db.Booking, { foreignKey: 'userId' });
+db.Booking.belongsTo(db.User, { foreignKey: 'userId' });
 
-db.User.hasMany(db.Booking);
-db.Booking.belongsTo(db.User);
+// Airport -> Flight (Departure & Arrival)
+db.Airport.hasMany(db.Flight, { foreignKey: 'departureAirportId', as: 'departingFlights' });
+db.Airport.hasMany(db.Flight, { foreignKey: 'arrivalAirportId', as: 'arrivingFlights' });
 
-db.Airport.hasMany(db.Flight, {
-    foreignKey: 'departureAirportId'
-});
+db.Flight.belongsTo(db.Airport, { foreignKey: 'departureAirportId', as: 'departureAirport' });
+db.Flight.belongsTo(db.Airport, { foreignKey: 'arrivalAirportId', as: 'arrivalAirport' });
 
-db.Airport.hasMany(db.Flight, {
-    foreignKey: 'arrivalAirportId'
-});
-
-db.Flight.belongsTo(db.Airport, {
-    as: 'departureAirport'
-});
-
-db.Flight.belongsTo(db.Airport, {
-    as: 'arrivalAirport'
-});
-
-db.Flight.hasMany(db.Seat);
-db.Seat.belongsTo(db.Flight);
-
-db.Flight.hasMany(db.Booking);
-db.Booking.belongsTo(db.Flight);
-
-db.Booking.hasMany(db.Passenger);
-db.Passenger.belongsTo(db.Booking);
-
-db.Seat.hasOne(db.Passenger);
-db.Passenger.belongsTo(db.Seat);
-
-db.Booking.hasOne(db.Payment);
-db.Payment.belongsTo(db.Booking);
+// Flight -> Booking
+db.Flight.hasMany(db.Booking, { foreignKey: 'flightId' });
+db.Booking.belongsTo(db.Flight, { foreignKey: 'flightId' });
 
 module.exports = db;

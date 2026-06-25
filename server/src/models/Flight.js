@@ -18,6 +18,11 @@ module.exports = (sequelize) => {
         type: DataTypes.STRING,
         allowNull: false,
       },
+      flightNumber: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        unique: true,
+      },
       departureAirportId: {
         type: DataTypes.UUID,
         allowNull: false,
@@ -25,11 +30,6 @@ module.exports = (sequelize) => {
       arrivalAirportId: {
         type: DataTypes.UUID,
         allowNull: false,
-      },
-      flightNumber: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true,
       },
       departureTime: {
         type: DataTypes.DATE,
@@ -39,22 +39,14 @@ module.exports = (sequelize) => {
         type: DataTypes.DATE,
         allowNull: false,
       },
+      basePrice: {
+        type: DataTypes.FLOAT,
+        allowNull: false,
+      },
       totalSeats: {
         type: DataTypes.INTEGER,
         allowNull: false,
-      },
-      availableSeats: {
-        type: DataTypes.INTEGER,
-        allowNull: false,
-      },
-      basePrice: {
-        type: DataTypes.DECIMAL(10, 2),
-        allowNull: false,
-      },
-      status: {
-        type: DataTypes.ENUM('scheduled', 'boarding', 'departed', 'arrived', 'cancelled'),
-        defaultValue: 'scheduled',
-      },
+      }
     },
     {
       sequelize,

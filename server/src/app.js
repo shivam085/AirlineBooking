@@ -2,6 +2,7 @@ const express = require('express');
 const cors = require('cors');
 const morgan = require('morgan');
 const helmet = require('helmet');
+const cookieParser = require('cookie-parser');
 const config = require('./config');
 const routes = require('./routes');
 const errorHandler = require('./middlewares/error.middleware');
@@ -25,6 +26,9 @@ app.use(express.json({ limit: '10mb' }));
 
 // Parse URL-encoded form data
 app.use(express.urlencoded({ extended: true }));
+
+// Parse Cookies
+app.use(cookieParser());
 
 // --------------- Logging ---------------
 // Log HTTP requests in development mode only
