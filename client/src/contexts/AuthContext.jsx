@@ -7,19 +7,30 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  // Check if user is logged in on mount
   useEffect(() => {
-    // We would typically hit a /me endpoint here if we had one.
-    // For now, we will rely on Login to set the user state.
-    // The JWT is stored in HTTP-Only cookies, so we don't have it locally.
-    // A proper implementation would fetch the user profile on load.
-    // For simplicity in Phase 2, we just set loading to false.
-    setLoading(false);
+    const fetchUser = async () => {
+      try {
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+          const response = await api.get('/auth/me');
+          setUser(response.data);
+        }
+      } catch (error) {
+        console.error('Failed to restore session', error);
+        localStorage.removeItem('accessToken');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
   }, []);
 
   const register = async (userData) => {
     try {
       const response = await api.post('/auth/register', userData);
+      localStorage.setItem('accessToken', response.data.accessToken);
+      setUser(response.data.user);
       return response.data;
     } catch (error) {
       throw error.response?.data?.message || 'Registration failed';
@@ -29,7 +40,7 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     try {
       const response = await api.post('/auth/login', credentials);
-      // Backend returns { user: {...}, accessToken: "..." }
+      localStorage.setItem('accessToken', response.data.accessToken);
       setUser(response.data.user);
       return response.data;
     } catch (error) {
@@ -40,10 +51,10 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       await api.post('/auth/logout');
-      setUser(null);
     } catch (error) {
       console.error('Logout failed', error);
-      // Force clear anyway
+    } finally {
+      localStorage.removeItem('accessToken');
       setUser(null);
     }
   };

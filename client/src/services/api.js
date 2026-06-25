@@ -15,9 +15,10 @@ const api = axios.create({
 // Runs before every request. We'll add JWT token attachment here later.
 api.interceptors.request.use(
   (config) => {
-    // TODO: Attach auth token from Redux store or localStorage
-    // const token = store.getState().auth.token;
-    // if (token) config.headers.Authorization = `Bearer ${token}`;
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     return config;
   },
   (error) => {
