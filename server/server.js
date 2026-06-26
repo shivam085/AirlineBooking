@@ -8,7 +8,7 @@ const startServer = async () => {
   try {
     // Force sync temporarily to drop old tables and create the new 4-table schema
     await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', { raw: true });
-    await db.sequelize.sync({ force: true });
+    await db.sequelize.sync({ alter: true });
     await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', { raw: true });
     console.log('✅ Database connected and synced successfully');
 

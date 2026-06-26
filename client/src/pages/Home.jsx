@@ -3,6 +3,7 @@ import { MdFlightTakeoff, MdFlightLand } from 'react-icons/md';
 import { HiOutlineCalendar, HiOutlineUserGroup, HiOutlineSearch } from 'react-icons/hi';
 import { BsShieldCheck, BsCreditCard2Back, BsHeadset } from 'react-icons/bs';
 import { FiArrowRight } from 'react-icons/fi';
+import SearchBar from '../components/SearchBar';
 
 const features = [
   {
@@ -41,8 +42,8 @@ const Home = () => {
           <div className="absolute bottom-20 right-10 w-96 h-96 bg-secondary rounded-full blur-3xl" />
         </div>
 
-        <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
-          <div className="text-center max-w-3xl mx-auto">
+        <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28 pb-32">
+          <div className="text-center max-w-4xl mx-auto">
             <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full px-4 py-1.5 mb-6">
               <span className="w-2 h-2 bg-success rounded-full animate-pulse" />
               <span className="text-white/80 text-sm font-medium">Live flight tracking available</span>
@@ -60,53 +61,8 @@ const Home = () => {
               Best prices guaranteed with instant confirmation.
             </p>
 
-            {/* ─── Search Card (Placeholder — full build in Step 10) ─── */}
-            <div className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 lg:p-8 max-w-4xl mx-auto">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-
-                {/* From */}
-                <div className="bg-white/10 rounded-xl p-4 text-left hover:bg-white/15 transition-colors cursor-pointer">
-                  <label className="text-xs text-white/60 uppercase tracking-wider font-medium flex items-center gap-1.5 mb-1">
-                    <MdFlightTakeoff className="text-primary-light" />
-                    From
-                  </label>
-                  <p className="text-white font-semibold">Select City</p>
-                </div>
-
-                {/* To */}
-                <div className="bg-white/10 rounded-xl p-4 text-left hover:bg-white/15 transition-colors cursor-pointer">
-                  <label className="text-xs text-white/60 uppercase tracking-wider font-medium flex items-center gap-1.5 mb-1">
-                    <MdFlightLand className="text-primary-light" />
-                    To
-                  </label>
-                  <p className="text-white font-semibold">Select City</p>
-                </div>
-
-                {/* Date */}
-                <div className="bg-white/10 rounded-xl p-4 text-left hover:bg-white/15 transition-colors cursor-pointer">
-                  <label className="text-xs text-white/60 uppercase tracking-wider font-medium flex items-center gap-1.5 mb-1">
-                    <HiOutlineCalendar className="text-primary-light" />
-                    Departure
-                  </label>
-                  <p className="text-white font-semibold">Pick Date</p>
-                </div>
-
-                {/* Passengers */}
-                <div className="bg-white/10 rounded-xl p-4 text-left hover:bg-white/15 transition-colors cursor-pointer">
-                  <label className="text-xs text-white/60 uppercase tracking-wider font-medium flex items-center gap-1.5 mb-1">
-                    <HiOutlineUserGroup className="text-primary-light" />
-                    Passengers
-                  </label>
-                  <p className="text-white font-semibold">1 Adult</p>
-                </div>
-              </div>
-
-              {/* Search Button */}
-              <button className="mt-6 w-full sm:w-auto px-8 py-3.5 bg-secondary hover:bg-secondary-dark text-white font-semibold rounded-xl transition-all duration-200 hover:shadow-lg hover:shadow-secondary/25 flex items-center justify-center gap-2 mx-auto cursor-pointer">
-                <HiOutlineSearch className="text-lg" />
-                Search Flights
-              </button>
-            </div>
+            {/* ─── Real Search Bar ─── */}
+            <SearchBar />
           </div>
         </div>
 

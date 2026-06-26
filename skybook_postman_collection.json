@@ -142,6 +142,98 @@
 					"response": []
 				}
 			]
+		},
+		{
+			"name": "Flights & Airports",
+			"item": [
+				{
+					"name": "Get All Airports",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/airports",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"airports"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Search Flights",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/flights/search?from=YOUR_DEP_AIRPORT_ID&to=YOUR_ARR_AIRPORT_ID&date=2026-06-25&passengers=1",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"flights",
+								"search"
+							],
+							"query": [
+								{
+									"key": "from",
+									"value": "YOUR_DEP_AIRPORT_ID",
+									"description": "UUID of Departure Airport"
+								},
+								{
+									"key": "to",
+									"value": "YOUR_ARR_AIRPORT_ID",
+									"description": "UUID of Arrival Airport"
+								},
+								{
+									"key": "date",
+									"value": "2026-06-25",
+									"description": "YYYY-MM-DD"
+								},
+								{
+									"key": "passengers",
+									"value": "1",
+									"description": "Number of seats needed"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Single Flight by ID",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{base_url}}/api/v1/flights/:id",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"flights",
+								":id"
+							],
+							"variable": [
+								{
+									"key": "id",
+									"value": "YOUR_FLIGHT_ID"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
 		}
 	],
 	"variable": [
