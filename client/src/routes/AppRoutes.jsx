@@ -3,6 +3,7 @@ import Home from '../pages/Home';
 import Login from '../pages/Login';
 import Register from '../pages/Register';
 import SearchResults from '../pages/SearchResults';
+import Checkout from '../pages/Checkout';
 
 // ─── Centralized Route Definitions ───
 // Every page in the app is registered here.
@@ -16,6 +17,12 @@ const AppRoutes = () => {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/search" element={<SearchResults />} />
+      
+      {/* 
+        Note: Checkout is technically public for now, but it redirects to home 
+        if accessed without a selected flight in BookingContext. 
+      */}
+      <Route path="/checkout" element={<Checkout />} />
 
       {/* Protected Routes (Step 6) */}
       {/* <Route element={<ProtectedRoute />}> */}

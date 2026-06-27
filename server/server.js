@@ -6,11 +6,8 @@ const { Server } = require('socket.io');
 
 const startServer = async () => {
   try {
-    // Force sync temporarily to drop old tables and create the new 4-table schema
-    await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 0', { raw: true });
-    await db.sequelize.sync({ alter: true });
-    await db.sequelize.query('SET FOREIGN_KEY_CHECKS = 1', { raw: true });
-    console.log('✅ Database connected and synced successfully');
+    await db.sequelize.authenticate();
+    console.log('✅ Database connected successfully');
 
     const server = http.createServer(app);
     
@@ -22,8 +19,12 @@ const startServer = async () => {
       }
     });
 
+    // Attach our custom Seat Locking handler
+    const setupSockets = require('./src/sockets/seatHandler');
+    setupSockets(io);
+
     // Make io accessible to the rest of the application
-    app.set('io', io); 
+    app.set('io', io);
 
     server.listen(config.port, () => {
       console.log(`\n🚀 Server running in ${config.env} mode on port ${config.port}`);
