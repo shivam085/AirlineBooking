@@ -3,6 +3,7 @@ const healthRoutes = require('./health.routes');
 const authRoutes = require('./auth.routes');
 const flightRoutes = require('./flight.routes');
 const airportRoutes = require('./airport.routes');
+const bookingRoutes = require('./booking.routes');
 
 const router = Router();
 
@@ -11,6 +12,6 @@ router.use('/auth', authRoutes);
 
 router.use('/flights', flightRoutes);
 router.use('/airports', airportRoutes);
-// router.use('/bookings', bookingRoutes);
+router.use('/bookings', bookingRoutes);
 
 module.exports = router;

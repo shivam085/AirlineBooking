@@ -6,9 +6,12 @@ import AppRoutes from './routes/AppRoutes';
 // Layout: Navbar (always visible) → Page Content → Footer (always visible)
 // BrowserRouter wraps this in main.jsx
 
+import { Toaster } from 'react-hot-toast';
+
 const App = () => {
   return (
     <div className="flex flex-col min-h-screen">
+      <Toaster position="top-center" />
       <Navbar />
       <main className="flex-1">
         <AppRoutes />

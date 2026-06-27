@@ -1,3 +1,5 @@
+const { Booking } = require('../models');
+
 /**
  * In-memory store for locked seats.
  * In a real production app with multiple servers, you would use Redis for this!
@@ -9,21 +11,33 @@ module.exports = (io) => {
   io.on('connection', (socket) => {
     
     // 1. User opens the Seat Map for a specific flight
-    socket.on('join_flight', (flightId) => {
+    socket.on('join_flight', async (flightId) => {
       // socket.join() puts this user in a "Room" just for this flight
       socket.join(flightId);
       
-      // Find all seats currently locked for THIS flight
-      const currentlyLocked = [];
-      for (const [key, value] of lockedSeats.entries()) {
-        const [lockedFlightId, seatId] = key.split('_');
-        if (lockedFlightId === flightId) {
-          currentlyLocked.push(seatId);
+      try {
+        // Find permanently booked seats from the database
+        const bookings = await Booking.findAll({ where: { flightId } });
+        const permanentlyBooked = [];
+        bookings.forEach(b => {
+          if (b.seatNumbers) permanentlyBooked.push(...b.seatNumbers);
+        });
+
+        // Find temporarily locked seats in memory
+        const currentlyLocked = [];
+        for (const [key, value] of lockedSeats.entries()) {
+          const [lockedFlightId, seatId] = key.split('_');
+          if (lockedFlightId === flightId) {
+            currentlyLocked.push(seatId);
+          }
         }
+        
+        // Tell the user who just joined which seats are already locked
+        // Combines permanent database locks with temporary socket locks
+        socket.emit('initial_locked_seats', [...permanentlyBooked, ...currentlyLocked]);
+      } catch (error) {
+        console.error('Error fetching booked seats for socket:', error);
       }
-      
-      // Tell the user who just joined which seats are already locked
-      socket.emit('initial_locked_seats', currentlyLocked);
     });
 
     // 2. User clicks on an empty seat
