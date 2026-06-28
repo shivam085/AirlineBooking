@@ -1,16 +1,42 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { BookingContext } from '../contexts/BookingContext';
 import { AuthContext } from '../contexts/AuthContext';
 import SeatMap from '../components/SeatMap';
+import PassengerForm from '../components/PassengerForm';
 import api from '../services/api';
 import toast from 'react-hot-toast';
+
+// Load Razorpay Script dynamically
+const loadRazorpayScript = () => {
+  return new Promise((resolve) => {
+    const script = document.createElement('script');
+    script.src = 'https://checkout.razorpay.com/v1/checkout.js';
+    script.onload = () => {
+      resolve(true);
+    };
+    script.onerror = () => {
+      resolve(false);
+    };
+    document.body.appendChild(script);
+  });
+};
 
 const Checkout = () => {
   const navigate = useNavigate();
   const { user } = useContext(AuthContext);
   const { selectedFlight, passengers, setPassengers, selectedSeats, resetBooking } = useContext(BookingContext);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [scriptLoaded, setScriptLoaded] = useState(false);
+
+  useEffect(() => {
+    loadRazorpayScript().then(res => {
+      if (!res) {
+        toast.error('Razorpay SDK failed to load. Are you online?');
+      }
+      setScriptLoaded(res);
+    });
+  }, []);
 
   if (!selectedFlight) {
     return <Navigate to="/" />;
@@ -28,9 +54,32 @@ const Checkout = () => {
     setPassengers(updatedPassengers);
   };
 
+  const verifyPayment = async (response, bookingId) => {
+    try {
+      await api.post('/payments/verify', {
+        razorpay_payment_id: response.razorpay_payment_id,
+        razorpay_order_id: response.razorpay_order_id,
+        razorpay_signature: response.razorpay_signature,
+        bookingId: bookingId
+      });
+      
+      toast.success('Payment verified successfully!');
+      resetBooking();
+      navigate('/success', { state: { bookingId } });
+    } catch (error) {
+      toast.error('Payment verification failed!');
+      setIsSubmitting(false);
+    }
+  };
+
   const handleBooking = async () => {
     if (!user) {
       toast.error('You must be logged in to book a flight.');
+      return;
+    }
+
+    if (!scriptLoaded) {
+      toast.error('Razorpay SDK failed to load');
       return;
     }
 
@@ -44,18 +93,53 @@ const Checkout = () => {
 
     setIsSubmitting(true);
     try {
-      const response = await api.post('/bookings', {
+      // 1. Create Booking & Order on Backend
+      // NOTE: Our api.js interceptor automatically returns response.data
+      const { order, booking } = await api.post('/bookings', {
         flightId: selectedFlight.id,
         passengers,
         seatNumbers: selectedSeats
       });
+
+      // 2. Open Razorpay Widget
+      const options = {
+        key: import.meta.env.VITE_RAZORPAY_KEY_ID || 'rzp_test_mock', // Fallback for dev mode without env
+        amount: order.amount,
+        currency: order.currency,
+        name: "SkyBook Airlines",
+        description: `Flight ${selectedFlight.airline} - ${selectedFlight.flightNumber}`,
+        order_id: order.id,
+        handler: function (response) {
+          // 3. Verify Payment
+          verifyPayment(response, booking.id);
+        },
+        prefill: {
+          name: user.name,
+          email: user.email,
+        },
+        theme: {
+          color: "#3B82F6", // Tailwind primary blue
+        },
+        modal: {
+          ondismiss: function() {
+            toast.error("Payment was cancelled.");
+            setIsSubmitting(false);
+          }
+        }
+      };
+
+      const rzp1 = new window.Razorpay(options);
+      rzp1.on('payment.failed', function (response) {
+        toast.error(`Payment Failed: ${response.error.description}`);
+        setIsSubmitting(false);
+      });
+
+      rzp1.open();
       
-      toast.success('Booking Successful! Enjoy your flight.');
-      resetBooking();
-      navigate('/');
     } catch (error) {
-      toast.error(error.response?.data?.message || 'Booking failed');
-    } finally {
+      console.error('Checkout Error:', error);
+      const errorMsg = error.response?.data?.message || error.message || 'Failed to initialize booking';
+      toast.error(`Error: ${errorMsg}`);
       setIsSubmitting(false);
     }
   };
@@ -70,10 +154,7 @@ const Checkout = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column: Flow */}
         <div className="lg:col-span-2 space-y-6">
-          
-          {/* Step 1: Seat Map */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-light p-6">
             <h2 className="text-xl font-semibold mb-6 flex items-center">
               <span className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center mr-3">1</span>
@@ -82,59 +163,15 @@ const Checkout = () => {
             <SeatMap />
           </div>
 
-          {/* Step 2: Passenger Details */}
           <div className="bg-white rounded-xl shadow-sm border border-gray-light p-6">
             <h2 className="text-xl font-semibold mb-6 flex items-center">
               <span className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center mr-3">2</span>
               Passenger Details
             </h2>
-            
-            <div className="space-y-6">
-              {passengers.map((passenger, index) => (
-                <div key={index} className="p-4 border border-gray-200 rounded-lg bg-gray-50/50">
-                  <h3 className="font-medium text-dark mb-4">Passenger {index + 1}</h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-                      <input 
-                        type="text" 
-                        value={passenger.firstName || ''}
-                        onChange={(e) => handlePassengerChange(index, 'firstName', e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
-                        placeholder="First Name"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-                      <input 
-                        type="text" 
-                        value={passenger.lastName || ''}
-                        onChange={(e) => handlePassengerChange(index, 'lastName', e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
-                        placeholder="Last Name"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">Age</label>
-                      <input 
-                        type="number" 
-                        value={passenger.age || ''}
-                        onChange={(e) => handlePassengerChange(index, 'age', e.target.value)}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none"
-                        placeholder="Age"
-                        min="1"
-                        max="120"
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <PassengerForm passengers={passengers} handlePassengerChange={handlePassengerChange} />
           </div>
-
         </div>
 
-        {/* Right Column: Order Summary */}
         <div className="lg:col-span-1">
           <div className="bg-white rounded-xl shadow-sm border border-gray-light p-6 sticky top-24">
             <h2 className="text-xl font-semibold mb-6 flex items-center">

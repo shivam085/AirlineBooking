@@ -4,6 +4,7 @@ import Login from '../pages/Login';
 import Register from '../pages/Register';
 import SearchResults from '../pages/SearchResults';
 import Checkout from '../pages/Checkout';
+import Success from '../pages/Success';
 
 // ─── Centralized Route Definitions ───
 // Every page in the app is registered here.
@@ -23,6 +24,7 @@ const AppRoutes = () => {
         if accessed without a selected flight in BookingContext. 
       */}
       <Route path="/checkout" element={<Checkout />} />
+      <Route path="/success" element={<Success />} />
 
       {/* Protected Routes (Step 6) */}
       {/* <Route element={<ProtectedRoute />}> */}

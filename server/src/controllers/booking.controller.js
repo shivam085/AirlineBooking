@@ -1,4 +1,5 @@
 const { Booking, Flight, sequelize } = require('../models');
+const Razorpay = require('razorpay');
 
 /**
  * Creates a new booking in the database using a Sequelize Transaction.
@@ -44,7 +45,9 @@ exports.createBooking = async (req, res) => {
     const allBookedSeats = new Set();
     
     existingBookings.forEach(b => {
-      if (b.seatNumbers) {
+      // For pending payments, we should still lock the seats. 
+      // If the payment fails later, we can cancel the booking.
+      if (b.seatNumbers && b.bookingStatus !== 'cancelled') {
         bookedSeatsCount += b.seatNumbers.length;
         b.seatNumbers.forEach(seat => allBookedSeats.add(seat));
       }
@@ -67,23 +70,40 @@ exports.createBooking = async (req, res) => {
     // 4. Calculate total amount
     const totalAmount = flight.basePrice * passengers.length;
 
-    // 5. Create the Booking inside the transaction
+    // 5. Create Razorpay Order
+    // Ensure you have RAZORPAY_KEY_ID and RAZORPAY_KEY_SECRET in .env
+    const razorpay = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID || 'rzp_test_mock',
+      key_secret: process.env.RAZORPAY_KEY_SECRET || 'rzp_secret_mock'
+    });
+
+    const options = {
+      amount: totalAmount * 100, // Razorpay amount is in paise
+      currency: "INR",
+      receipt: `receipt_order_${Date.now()}`,
+    };
+
+    const order = await razorpay.orders.create(options);
+
+    // 6. Create the Booking inside the transaction
     const booking = await Booking.create({
       userId,
       flightId,
       passengers,
       seatNumbers,
       amount: totalAmount,
-      paymentStatus: 'successful',
-      bookingStatus: 'confirmed'
+      paymentStatus: 'pending',
+      bookingStatus: 'confirmed', // Keep confirmed but payment is pending
+      paymentId: order.id // Temporarily store the order ID here
     }, { transaction });
 
-    // 6. Commit the transaction (First successful booking wins!)
+    // 7. Commit the transaction (First successful booking wins!)
     await transaction.commit();
 
     res.status(201).json({
-      message: 'Booking successful!',
-      booking
+      message: 'Booking created, awaiting payment',
+      booking,
+      order // Send razorpay order to frontend
     });
 
   } catch (error) {
