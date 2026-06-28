@@ -7,7 +7,7 @@ import { MdFlightTakeoff } from 'react-icons/md';
 
 const navLinks = [
   { name: 'Home', path: '/' },
-  { name: 'Flights', path: '/flights' },
+  { name: 'Flights', path: '/search' },
   { name: 'My Bookings', path: '/bookings' },
 ];
 
@@ -59,6 +59,20 @@ const Navbar = () => {
                 {link.name}
               </NavLink>
             ))}
+            {user && user.role === 'admin' && (
+              <NavLink
+                to="/admin"
+                className={({ isActive }) =>
+                  `px-4 py-2 rounded-lg text-sm font-bold transition-all duration-200 ${
+                    isActive
+                      ? 'bg-error/10 text-error'
+                      : 'text-error hover:bg-error/5'
+                  }`
+                }
+              >
+                Admin Panel
+              </NavLink>
+            )}
           </div>
 
           {/* ─── Auth Buttons / User Menu (Desktop) ─── */}
@@ -152,6 +166,21 @@ const Navbar = () => {
               {link.name}
             </NavLink>
           ))}
+          {user && user.role === 'admin' && (
+            <NavLink
+              to="/admin"
+              onClick={() => setIsMenuOpen(false)}
+              className={({ isActive }) =>
+                `block px-4 py-2.5 rounded-lg text-sm font-bold transition-all duration-200 ${
+                  isActive
+                    ? 'bg-error/10 text-error'
+                    : 'text-error hover:bg-error/5'
+                }`
+              }
+            >
+              Admin Panel
+            </NavLink>
+          )}
           <div className="pt-3 border-t border-gray-100 flex flex-col gap-2">
             {isAuthenticated && user ? (
               <>

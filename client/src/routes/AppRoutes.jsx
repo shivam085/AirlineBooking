@@ -5,6 +5,8 @@ import Register from '../pages/Register';
 import SearchResults from '../pages/SearchResults';
 import Checkout from '../pages/Checkout';
 import Success from '../pages/Success';
+import AdminRoute from '../components/layout/AdminRoute';
+import AdminDashboard from '../pages/AdminDashboard';
 
 // ─── Centralized Route Definitions ───
 // Every page in the app is registered here.
@@ -26,10 +28,10 @@ const AppRoutes = () => {
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/success" element={<Success />} />
 
-      {/* Protected Routes (Step 6) */}
-      {/* <Route element={<ProtectedRoute />}> */}
-      {/*   <Route path="/bookings" element={<MyBookings />} /> */}
-      {/* </Route> */}
+      {/* Admin Routes (Step 6.1) */}
+      <Route element={<AdminRoute />}>
+        <Route path="/admin" element={<AdminDashboard />} />
+      </Route>
 
       {/* 404 Catch-all */}
       <Route path="*" element={<NotFound />} />

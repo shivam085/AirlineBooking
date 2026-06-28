@@ -10,12 +10,11 @@ async function seedDatabase() {
     console.log('✅ Database synced');
 
     // 2. Create Default Admin User
-    const adminPassword = await bcrypt.hash('Admin123!', 12);
     await db.User.create({
       firstName: 'System',
       lastName: 'Admin',
       email: 'admin@skybook.com',
-      password: adminPassword,
+      password: 'Admin123!', // The User model hook automatically hashes this
       role: 'admin',
       isVerified: true
     });
