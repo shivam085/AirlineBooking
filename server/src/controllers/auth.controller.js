@@ -79,6 +79,42 @@ class AuthController {
       next(error);
     }
   }
+
+  async refresh(req, res, next) {
+    try {
+      const { refreshToken: oldRefreshToken } = req.cookies;
+
+      if (!oldRefreshToken) {
+        return res.status(401).json({ success: false, message: 'Refresh token not found' });
+      }
+
+      const { user, accessToken, refreshToken } = await authService.refreshTokens(oldRefreshToken);
+
+      // Set new refresh token in HttpOnly cookie
+      res.cookie('refreshToken', refreshToken, {
+        httpOnly: true,
+        secure: config.env === 'production',
+        sameSite: 'strict',
+        maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      });
+
+      res.status(200).json({
+        success: true,
+        data: {
+          user,
+          accessToken,
+        },
+      });
+    } catch (error) {
+      // Clear cookie if refresh failed (e.g. token expired/invalid)
+      res.clearCookie('refreshToken', {
+        httpOnly: true,
+        secure: config.env === 'production',
+        sameSite: 'strict',
+      });
+      res.status(401).json({ success: false, message: 'Session expired. Please log in again.' });
+    }
+  }
 }
 
 module.exports = new AuthController();

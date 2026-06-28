@@ -33,8 +33,37 @@ api.interceptors.response.use(
     // Return the data directly — saves writing .data everywhere
     return response.data;
   },
-  (error) => {
-    // TODO: Handle 401 (token expired) → refresh token flow
+  async (error) => {
+    const originalRequest = error.config;
+
+    // Handle 401 Unauthorized (token expired)
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      // Prevent infinite loops by marking the request as retried
+      originalRequest._retry = true;
+
+      try {
+        // Make request to refresh token (browser will automatically send HttpOnly cookie)
+        // We use raw axios here to avoid triggering this interceptor again
+        const response = await axios.post('/api/v1/auth/refresh', {}, {
+          withCredentials: true
+        });
+
+        const newAccessToken = response.data.data.accessToken;
+        
+        // Save new access token
+        localStorage.setItem('accessToken', newAccessToken);
+
+        // Update the authorization header and retry the original request
+        originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        return api(originalRequest);
+      } catch (refreshError) {
+        // If refresh fails (e.g. refresh token expired), clear local storage and force login
+        localStorage.removeItem('accessToken');
+        window.location.href = '/login';
+        return Promise.reject(refreshError);
+      }
+    }
+
     const message =
       error.response?.data?.message || error.message || 'Something went wrong';
     

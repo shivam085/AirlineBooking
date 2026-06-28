@@ -24,6 +24,10 @@ class AuthService {
     const accessToken = generateAccessToken(user.id);
     const refreshToken = generateRefreshToken(user.id);
 
+    // Save refresh token to user in database
+    user.refreshToken = refreshToken;
+    await user.save();
+
     return {
       user: {
         id: user.id,
@@ -54,6 +58,10 @@ class AuthService {
     const accessToken = generateAccessToken(user.id);
     const refreshToken = generateRefreshToken(user.id);
 
+    // Save refresh token to database
+    user.refreshToken = refreshToken;
+    await user.save();
+
     return {
       user: {
         id: user.id,
@@ -64,6 +72,42 @@ class AuthService {
       },
       accessToken,
       refreshToken,
+    };
+  }
+
+  async refreshTokens(oldRefreshToken) {
+    // Check if token exists in DB (revocation check)
+    const user = await User.findOne({ where: { refreshToken: oldRefreshToken } });
+    
+    if (!user) {
+      throw new ApiError(401, 'Invalid or expired refresh token');
+    }
+
+    // Verify token validity
+    const { verifyRefreshToken } = require('../utils/token');
+    const decoded = verifyRefreshToken(oldRefreshToken);
+    if (!decoded || decoded.id !== user.id) {
+      throw new ApiError(401, 'Invalid or expired refresh token');
+    }
+
+    // Generate new tokens
+    const accessToken = generateAccessToken(user.id);
+    const newRefreshToken = generateRefreshToken(user.id);
+
+    // Save new refresh token to db
+    user.refreshToken = newRefreshToken;
+    await user.save();
+
+    return {
+      user: {
+        id: user.id,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+      },
+      accessToken,
+      refreshToken: newRefreshToken,
     };
   }
 }
