@@ -7,6 +7,7 @@ import Checkout from '../pages/Checkout';
 import Success from '../pages/Success';
 import AdminRoute from '../components/layout/AdminRoute';
 import AdminDashboard from '../pages/AdminDashboard';
+import MyBookings from '../pages/MyBookings';
 
 // ─── Centralized Route Definitions ───
 // Every page in the app is registered here.
@@ -27,6 +28,7 @@ const AppRoutes = () => {
       */}
       <Route path="/checkout" element={<Checkout />} />
       <Route path="/success" element={<Success />} />
+      <Route path="/bookings" element={<MyBookings />} />
 
       {/* Admin Routes (Step 6.1) */}
       <Route element={<AdminRoute />}>

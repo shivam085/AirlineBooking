@@ -7,4 +7,8 @@ const authMiddleware = require('../middlewares/auth.middleware');
 // Protected route: You must be logged in to book a flight
 router.post('/', authMiddleware, bookingController.createBooking);
 
+// GET /api/v1/bookings/my-bookings
+// Protected route: Get bookings for the logged-in user
+router.get('/my-bookings', authMiddleware, bookingController.getMyBookings);
+
 module.exports = router;

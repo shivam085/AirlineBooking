@@ -115,3 +115,29 @@ exports.createBooking = async (req, res) => {
     res.status(500).json({ message: 'Failed to process booking' });
   }
 };
+
+/**
+ * Gets all bookings for the currently authenticated user.
+ */
+exports.getMyBookings = async (req, res) => {
+  try {
+    const userId = req.user.id;
+
+    const bookings = await Booking.findAll({
+      where: { userId },
+      include: [
+        {
+          model: Flight,
+          include: ['departureAirport', 'arrivalAirport']
+        }
+      ],
+      order: [['createdAt', 'DESC']]
+    });
+
+    res.status(200).json({ bookings });
+  } catch (error) {
+    console.error('Error fetching bookings:', error);
+    res.status(500).json({ message: 'Failed to fetch bookings' });
+  }
+};
+
