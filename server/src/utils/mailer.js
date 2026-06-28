@@ -16,16 +16,15 @@ const sendEmail = async (options) => {
   const emailHtml = mailGenerator.generate(options.mailgenContent);
 
   const transporter = nodemailer.createTransport({
-    host: process.env.MAILTRAP_SMTP_HOST,
-    port: process.env.MAILTRAP_SMTP_PORT,
+    service: process.env.SMTP_SERVICE || 'gmail',
     auth: {
-      user: process.env.MAILTRAP_SMTP_USER,
-      pass: process.env.MAILTRAP_SMTP_PASS,
+      user: process.env.SMTP_USER,
+      pass: process.env.SMTP_PASS,
     },
   });
 
   const mail = {
-    from: '"SkyBook Reservations" <bookings@skybook.com>',
+    from: `"SkyBook" <${process.env.SMTP_USER}>`,
     to: options.email,
     subject: options.subject,
     text: emailTextual,
